@@ -1,5 +1,6 @@
 import sys
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from flask import Flask, render_template, request, jsonify, redirect, url_for, abort
 
 app = Flask(__name__)
@@ -7,19 +8,26 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:WierdScience#23\
 @localhost:5432/postgres"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+
+
+class TodoList(db.Model):
+    __tablename__ = "todolists"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(), nullable=False)
+    todo = db.relationship("Todo", backref="list", lazy=True)
 
 
 class Todo(db.Model):
     __tablename__ = "todo"
     id = db.Column(db.Integer, primary_key=True)
     description = db.Column(db.String(), nullable=False)
+    completed = db.Column(db.Boolean, nullable=False, default=False)
+    list_id = db.Column(db.Integer, db.ForeignKey(
+        "todolists.id"), nullable=False)
 
     def __repr(self):
-        return f"<ToDo: {self.id}, Description: {self.description}>"
-
-
-with app.app_context():
-    db.create_all()
+        return f"<ToDo: {self.id}, Description: {self.description}, Completed: {self.completed}>"
 
 
 @app.route("/todos/create", methods=["POST"])
@@ -57,6 +65,18 @@ def update_todo_status(todo_id):
     finally:
         db.session.close()
     return redirect(url_for("index"))
+
+
+@app.route("/todos/<todo_id>/set-deleted", methods=["DELETE"])
+def delete_todo(todo_id):
+    try:
+        Todo.query.filter_by(id=todo_id).delete()
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+    finally:
+        db.session.close()
+    return jsonify({'success': True})
 
 
 @app.route("/")
