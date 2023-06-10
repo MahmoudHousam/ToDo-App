@@ -10,12 +10,16 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
+# parent model
+
 
 class TodoList(db.Model):
     __tablename__ = "todolists"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), nullable=False)
-    todo = db.relationship("Todo", backref="list", lazy=True)
+    todos = db.relationship("Todo", backref="list", lazy=True)
+
+# child model
 
 
 class Todo(db.Model):
@@ -24,9 +28,9 @@ class Todo(db.Model):
     description = db.Column(db.String(), nullable=False)
     completed = db.Column(db.Boolean, nullable=False, default=False)
     list_id = db.Column(db.Integer, db.ForeignKey(
-        "todolists.id"), nullable=False)
+        "todolists.id"), nullable=True)
 
-    def __repr(self):
+    def __repr__(self):
         return f"<ToDo: {self.id}, Description: {self.description}, Completed: {self.completed}>"
 
 
@@ -79,9 +83,16 @@ def delete_todo(todo_id):
     return jsonify({'success': True})
 
 
+@app.route("/lists/<list_id>")
+def get_todo_by_id(list_id):
+    return render_template(
+        "index.html", data=Todo.query.filter_by(list_id=list_id).order_by("id").all()
+    )
+
+
 @app.route("/")
 def index():
-    return render_template("index.html", data=Todo.query.all())
+    return redirect(url_for("get_todo_by_id", list_id=1))
 
 
 if __name__ == "__main__":
