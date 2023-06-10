@@ -9,6 +9,18 @@
         list-style: none;
         padding: 0;
         margin: 0;
+        width: 350px;
+      }
+
+      li {
+        clear: both;
+      }
+
+      li button {
+        outline: none;
+        color: red;
+        float: right;
+        cursor: pointer;
       }
     </style>
   </head>
@@ -34,6 +46,7 @@
           endif
           %}
         />{{ i.description }}
+        <button class="set-deleted" data-id="{{ i.id }}">&cross;</button>
       </li>
       {% endfor %}
     </ul>
@@ -62,6 +75,18 @@
             });
         };
       }
+      const deleteBtns = document.querySelectorAll(".set-deleted");
+      for (let i = 0; i < deleteBtns.length; i++) {
+        const btn = deleteBtns[i];
+        btn.onclick = function (e) {
+          const todoId = e.target.dataset["id"];
+          fetch("/todos/" + todoId + "/set-deleted", {
+            method: "DELETE",
+          }).then(function () {
+            location.reload();
+          });
+        };
+      }
       document.getElementById("form").onsubmit = function (e) {
         e.preventDefault();
         fetch("/todos/create", {
@@ -82,6 +107,9 @@
             liItem.innerHTML = jsonResponse["description"];
             document.getElementById("todos").appendChild(liItem);
             document.getElementById("error").className = "hidden";
+          })
+          .then(function () {
+            location.reload();
           })
           .catch(function () {
             document.getElementById("error").className = "";
