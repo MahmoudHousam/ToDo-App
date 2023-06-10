@@ -40,7 +40,10 @@ def create_new_todo():
     error = False
     try:
         description = request.get_json()["description"]
+        list_id = request.get_json()["list_id"]
         new_todo = Todo(description=description)
+        active_list = TodoList.query.get(list_id)
+        new_todo.list = active_list
         db.session.add(new_todo)
         db.session.commit()
         description_body["description"] = new_todo.description
@@ -83,11 +86,15 @@ def delete_todo(todo_id):
     return jsonify({'success': True})
 
 
-@app.route("/lists/<list_id>")
+@app.route('/lists/<list_id>')
 def get_todo_by_id(list_id):
-    return render_template(
-        "index.html", data=Todo.query.filter_by(list_id=list_id).order_by("id").all()
-    )
+    active_list = TodoList.query.get(list_id)
+    return render_template('index.html',
+                           lists=TodoList.query.all(),
+                           active_list=active_list,
+                           todos=Todo.query.filter_by(
+                               list_id=list_id).order_by('id').all()
+                           )
 
 
 @app.route("/")
