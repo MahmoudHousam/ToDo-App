@@ -89,11 +89,18 @@ def delete_todo(todo_id):
 @app.route('/lists/<list_id>')
 def get_todo_by_id(list_id):
     active_list = TodoList.query.get(list_id)
+    if active_list is None:
+        active_list = TodoList(name="My First TodoList")
+        try:
+            db.session.add(active_list)
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+    todos = Todo.query.filter_by(list_id=list_id).order_by('id').all()
     return render_template('index.html',
                            lists=TodoList.query.all(),
                            active_list=active_list,
-                           todos=Todo.query.filter_by(
-                               list_id=list_id).order_by('id').all()
+                           todos=todos
                            )
 
 
