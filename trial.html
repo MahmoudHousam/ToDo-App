@@ -1,0 +1,13 @@
+<div class="lists-wrapper">
+  <form id="list-wrap">
+    <input type="text" id="creator" name="creator" />
+    <input type="submit" value="Create List" />
+  </form>
+  <ul id="lists">
+    {% for list in lists %}
+    <li>
+      <a href="/lists/{{ list.id }}"> {{ list.name }} </a>
+    </li>
+    {% endfor %}
+  </ul>
+</div>

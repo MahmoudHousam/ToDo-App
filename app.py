@@ -46,6 +46,8 @@ def create_new_todo():
         new_todo.list = active_list
         db.session.add(new_todo)
         db.session.commit()
+        description_body["id"] = new_todo.id
+        description_body["complete"] = new_todo.description
         description_body["description"] = new_todo.description
     except Exception:
         error = True
@@ -88,6 +90,7 @@ def delete_todo(todo_id):
 
 @app.route('/lists/<list_id>')
 def get_todo_by_id(list_id):
+    lists = TodoList.query.all()
     active_list = TodoList.query.get(list_id)
     if active_list is None:
         active_list = TodoList(name="My First TodoList")
@@ -98,10 +101,49 @@ def get_todo_by_id(list_id):
             db.session.rollback()
     todos = Todo.query.filter_by(list_id=list_id).order_by('id').all()
     return render_template('index.html',
-                           lists=TodoList.query.all(),
+                           lists=lists,
+                           todos=todos,
                            active_list=active_list,
-                           todos=todos
                            )
+
+
+@app.route("/lists/create", methods=["POST"])
+def create_list():
+    list_body = {}
+    error = False
+    try:
+        name = request.get_json()["name"]
+        newlist = TodoList(name=name)
+        db.session.add(newlist)
+        db.session.commit(newlist)
+        list_body["name"] = newlist.name
+        list_body["id"] = newlist.id
+    except Exception:
+        db.session.rollback()
+        error = True
+        print(sys.exc_info)
+    finally:
+        db.session.close()
+        if error:
+            abort(400)
+        else:
+            return jsonify(list_body)
+
+
+@app.route("/lists/<list_id>/set-list-completed", methods=["Post"])
+def update_list_status(list_id):
+    try:
+        completed = request.get_json()["completed"]
+        print('completed', completed)
+        todo = TodoList.query.get(list_id)
+        for todo in list.todos:
+            todo.completed = True
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+    finally:
+        db.session.close()
+    return redirect(url_for("index"))
 
 
 @app.route("/")

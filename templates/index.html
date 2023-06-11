@@ -25,17 +25,36 @@
       }
       .lists-wrapper,
       .todos-wrapper {
-        display: inline-block;
+        display: inline-table;
         vertical-align: top;
       }
     </style>
   </head>
   <body>
     <div class="lists-wrapper">
+      <h3>Create List</h3>
+      <form id="list-wrap">
+        <input type="text" id="creator" name="creator" />
+        <input type="submit" value="Create List" />
+      </form>
       <ul id="lists">
         {% for list in lists %}
         <li>
+          <input
+            class="check-completed"
+            data-id="{{ list.id }}"
+            type="checkbox"
+            {%
+            if
+            list.completed
+            %}
+            checked
+            {%
+            endif
+            %}
+          />
           <a href="/lists/{{ list.id }}"> {{ list.name }} </a>
+          <button class="delete-button" data-id="{{ list.id }}">&cross;</button>
         </li>
         {% endfor %}
       </ul>
