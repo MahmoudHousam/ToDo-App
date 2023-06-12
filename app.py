@@ -120,7 +120,7 @@ def create_list():
         name = request.get_json()["name"]
         newlist = TodoList(name=name)
         db.session.add(newlist)
-        db.session.commit(newlist)
+        db.session.commit()
         list_body["name"] = newlist.name
         list_body["id"] = newlist.id
     except Exception:
@@ -135,7 +135,7 @@ def create_list():
             return jsonify(list_body)
 
 
-@app.route("/lists/<list_id>/set-list-completed", methods=["Post"])
+@app.route("/lists/<list_id>/set-list-completed", methods=["POST"])
 def update_list_status(list_id):
     try:
         todo_list = TodoList.query.get(list_id)
