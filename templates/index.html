@@ -33,13 +33,13 @@
   <body>
     <div class="lists-wrapper">
       <h3>TODO Lists</h3>
-      <form action="lists/create" method="POST" id="list-wrap">
+      <form action="lists/create" method="POST" id="list-form">
         <label for="todolist">Create List:</label>
         <input
           type="text"
           id="todolist-input"
-          placeholder="add new a 'list"
-          id="{{ active_list.id }}"
+          placeholder="add a new list"
+          data-id="{{ active_list.id }}"
         />
         <input type="submit" value="Create List" />
       </form>
@@ -52,14 +52,16 @@
             type="checkbox"
           />
           <a href="/lists/{{ list.id }}"> {{ list.name }} </a>
-          <button class="delete-button" data-id="{{ list.id }}">&cross;</button>
+          <button class="delete-list-button" data-id="{{ list.id }}">
+            &cross;
+          </button>
         </li>
         {% endfor %}
       </ul>
     </div>
     <div class="todos-wrapper">
       <h3>{{ active_list.name }}</h3>
-      <form id="form">
+      <form id="todo-form">
         <input
           type="hidden"
           name="list_id"
@@ -118,7 +120,7 @@
                 const todocheckboxes =
                   document.getElementById(".check-completed");
                 for (let i = 0; i < todocheckboxes.length; i++) {
-                  todocheckbox = todocheckboxes[i];
+                  const todocheckbox = todocheckboxes[i];
                   todocheckbox.checked = true;
                 }
               })
@@ -171,8 +173,76 @@
             });
         };
       }
+      const deleteListBtns = document.querySelectorAll(".delete-list-button");
+      for (let i = 0; i < deleteListBtns.length; i++) {
+        const deleteListBtn = deleteListBtns[i];
+        deleteListBtn.onclick = function (e) {
+          console.log("Delete event: ", e);
+          const listId = e.target.dataset.id;
+          fetch("/lists/" + listId + "/set-list-deleted", {
+            method: "DELETE",
+          })
+            .then(function () {
+              console.log("Parent?", e.target);
+              const item = e.target.parentElement;
+              item.remove();
+              document.getElementById("error").className = "hidden";
+              window.location.reload(true);
+            })
+            .catch(function (e) {
+              console.error(e);
+              document.getElementById("error").className = "";
+            });
+        };
+      }
+      const listWrapInput = document.getElementById("todolist-input");
+      document.getElementById("list-form").onsubmit = function (e) {
+        e.preventDefault();
+        const lsWrInpt = listWrapInput.value;
+        listWrapInput.value = "";
+        const ListId = document.getElementById("list_id").value;
+        fetch("/lists/create", {
+          method: "POST",
+          body: JSON.stringify({
+            name: lsWrInpt,
+            list_id: ListId,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((response) => response.json())
+          .then((jsonResponse) => {
+            const li = document.createElement("LI");
+            li.innerHTML = jsonResponse["name"];
+            // const checkbox = document.createElement("input");
+            // checkbox.className = "check-completed";
+            // checkbox.type = "checkbox";
+            // checkbox.setAttribute("data-id", jsonResponse.id);
+            // li.appendChild(checkbox);
+
+            // const text = document.createTextNode(
+            //   " " + jsonResponse.description
+            // );
+            // li.appendChild(text);
+
+            // const deleteBtn = document.createElement("button");
+            // deleteBtn.className = "delete-button";
+            // deleteBtn.setAttribute("data-id", jsonResponse.id);
+            // deleteBtn.innerHTML = "&cross;";
+            // li.appendChild(deleteBtn);
+
+            document.getElementById("lists").appendChild(li);
+            document.getElementById("error").className = "hidden";
+            window.location.reload(true);
+          })
+          .catch(function () {
+            console.error("Error occurred");
+            document.getElementById("error").className = "";
+          });
+      };
       const descInput = document.getElementById("description");
-      document.getElementById("form").onsubmit = function (e) {
+      document.getElementById("todo-form").onsubmit = function (e) {
         e.preventDefault();
         const desc = descInput.value;
         descInput.value = "";
@@ -189,26 +259,28 @@
         })
           .then((response) => response.json())
           .then((jsonResponse) => {
-            const li = document.createElement("li");
-            const checkbox = document.createElement("input");
-            checkbox.className = "check-completed";
-            checkbox.type = "checkbox";
-            checkbox.setAttribute("data-id", jsonResponse.id);
-            li.appendChild(checkbox);
+            const li = document.createElement("LI");
+            li.innerHTML = jsonResponse["description"];
+            // const checkbox = document.createElement("input");
+            // checkbox.className = "check-completed";
+            // checkbox.type = "checkbox";
+            // checkbox.setAttribute("data-id", jsonResponse.id);
+            // li.appendChild(checkbox);
 
-            const text = document.createTextNode(
-              " " + jsonResponse.description
-            );
-            li.appendChild(text);
+            // const text = document.createTextNode(
+            //   " " + jsonResponse.description
+            // );
+            // li.appendChild(text);
 
-            const deleteBtn = document.createElement("button");
-            deleteBtn.className = "delete-button";
-            deleteBtn.setAttribute("data-id", jsonResponse.id);
-            deleteBtn.innerHTML = "&cross;";
-            li.appendChild(deleteBtn);
+            // const deleteBtn = document.createElement("button");
+            // deleteBtn.className = "delete-button";
+            // deleteBtn.setAttribute("data-id", jsonResponse.id);
+            // deleteBtn.innerHTML = "&cross;";
+            // li.appendChild(deleteBtn);
 
             document.getElementById("todos").appendChild(li);
             document.getElementById("error").className = "hidden";
+            // window.location.reload(true);
           })
           .catch(function () {
             console.error("Error occurred");
