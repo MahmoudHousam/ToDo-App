@@ -107,6 +107,11 @@ def get_todo_by_id(list_id):
                            )
 
 
+@app.route("/")
+def index():
+    return redirect(url_for("get_todo_by_id", list_id=1))
+
+
 @app.route("/lists/create", methods=["POST"])
 def create_list():
     list_body = {}
@@ -133,10 +138,8 @@ def create_list():
 @app.route("/lists/<list_id>/set-list-completed", methods=["Post"])
 def update_list_status(list_id):
     try:
-        completed = request.get_json()["completed"]
-        print('completed', completed)
-        todo = TodoList.query.get(list_id)
-        for todo in list.todos:
+        todo_list = TodoList.query.get(list_id)
+        for todo in todo_list.todos:
             todo.completed = True
         db.session.commit()
     except Exception:
@@ -146,9 +149,18 @@ def update_list_status(list_id):
     return redirect(url_for("index"))
 
 
-@app.route("/")
-def index():
-    return redirect(url_for("get_todo_by_id", list_id=1))
+@app.route("/lists/<list_id>/set-list-deleted")
+def delete_list(list_id):
+    try:
+        todo_list = TodoList.query.get(list_id)
+        for todo in todo_list.todos:
+            db.session.delete(todo)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+    finally:
+        db.session.close()
+    return jsonify({'success': True})
 
 
 if __name__ == "__main__":
