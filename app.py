@@ -155,6 +155,7 @@ def delete_list(list_id):
         todo_list = TodoList.query.get(list_id)
         for todo in todo_list.todos:
             db.session.delete(todo)
+        db.session.delete(todo_list)
         db.session.commit()
     except Exception:
         db.session.rollback()

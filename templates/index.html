@@ -158,14 +158,15 @@
         const btn = deleteBtns[i];
         btn.onclick = function (e) {
           const todoId = e.target.dataset["id"];
-          fetch("/todos/" + todoId, {
+          fetch("/todos/" + todoId + "/set-deleted", {
             method: "DELETE",
           })
             .then(function () {
-              console.log("Parent?", e.target);
-              const item = e.target.parentElement;
-              item.remove();
-              document.getElementById("error").className = "hidden";
+              location.reload();
+              // console.log("Parent?", e.target);
+              // const item = e.target.parentElement;
+              // item.remove();
+              // document.getElementById("error").className = "hidden";
             })
             .catch(function (e) {
               console.error(e);
@@ -177,8 +178,8 @@
       for (let i = 0; i < deleteListBtns.length; i++) {
         const deleteListBtn = deleteListBtns[i];
         deleteListBtn.onclick = function (e) {
-          console.log("Delete event: ", e);
-          const listId = e.target.dataset.id;
+          console.log("Delete event: ", this);
+          const listId = e.target.dataset["id"];
           fetch("/lists/" + listId + "/set-list-deleted", {
             method: "DELETE",
           })
@@ -187,7 +188,6 @@
               const item = e.target.parentElement;
               item.remove();
               document.getElementById("error").className = "hidden";
-              window.location.reload(true);
             })
             .catch(function (e) {
               console.error(e);
