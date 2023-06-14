@@ -1,45 +1,19 @@
-from cc import app, db, Todo, TodoList
-app.app_context().push()
+import sys
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from flask import Flask, render_template, request, jsonify, redirect, url_for, abort
 
-new_list = TodoList(name="Saturday, 10th")
-todo1 = Todo(description="Call Dr Zakria")
-todo2 = Todo(description="Arrange Meeting with Ahmed Husien")
-todo3 = Todo(description="Download the new movie")
+app = Flask(__name__)
+app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:WierdScience#23\
+@localhost:5432/postgres"
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
-todo1.list = new_list
-todo2.list = new_list
-todo3.list = new_list
-
-
-# try:
-#     db.session.add(new_list)
-#     db.session.commit()
-# except Exception:
-#     db.session.rollback()
-# finally:
-#     db.session.close()
-
-
-new_list = TodoList(name="New Milestone 2.6.2")
-
-try:
-    db.session.add(new_list)
-    db.session.commit()
-except Exception:
-    db.session.rollback()
-
-todo4 = Todo(description="EDA Clinics to Operation (Hala)")
-todo5 = Todo(description="EDA Cath Dataframe (Hala)")
-todo6 = Todo(description="Automate the boring staff")
-
-todo4.list_id = new_list.id
-todo5.list_id = new_list.id
-todo6.list_id = new_list.id
-
-try:
-    db.session.add_all([todo4, todo5, todo6])
-    db.session.commit()
-except Exception:
-    db.session.rollback()
-finally:
-    db.session.close()
+association_table = db.Table(
+    "association_table",
+    db.Column("surgery_mrn", db.Integer, db.ForeignKey(
+        "surgery.mrn"), primary_key=True),
+    db.Column("cath_mrn", db.Integer, db.ForeignKey(
+        "cath.mrn"), primary_key=True)
+)
