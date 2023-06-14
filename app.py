@@ -92,13 +92,13 @@ def delete_todo(todo_id):
 def get_todo_by_id(list_id):
     lists = TodoList.query.all()
     active_list = TodoList.query.get(list_id)
-    if active_list is None:
-        active_list = TodoList(name="My First TodoList")
-        try:
-            db.session.add(active_list)
-            db.session.commit()
-        except Exception:
-            db.session.rollback()
+    # if active_list is None:
+    #     active_list = TodoList(name="My First TodoList")
+    #     try:
+    #         db.session.add(active_list)
+    #         db.session.commit()
+    #     except Exception:
+    #         db.session.rollback()
     todos = Todo.query.filter_by(list_id=list_id).order_by('id').all()
     return render_template('index.html',
                            lists=lists,
@@ -149,7 +149,7 @@ def update_list_status(list_id):
     return redirect(url_for("index"))
 
 
-@app.route("/lists/<list_id>/set-list-deleted")
+@app.route("/lists/<list_id>/set-list-deleted", methods=["DELETE"])
 def delete_list(list_id):
     try:
         todo_list = TodoList.query.get(list_id)

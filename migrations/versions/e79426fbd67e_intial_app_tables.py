@@ -1,8 +1,8 @@
-"""create relationships
+"""intial app tables
 
-Revision ID: 1f04853ab225
-Revises: a1f01dc323bb
-Create Date: 2023-06-10 01:15:03.687360
+Revision ID: e79426fbd67e
+Revises: 
+Create Date: 2023-06-14 17:36:51.196474
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '1f04853ab225'
-down_revision = 'a1f01dc323bb'
+revision = 'e79426fbd67e'
+down_revision = None
 branch_labels = None
 depends_on = None
 

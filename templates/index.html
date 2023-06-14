@@ -188,6 +188,7 @@
               const item = e.target.parentElement;
               item.remove();
               document.getElementById("error").className = "hidden";
+              location.reload();
             })
             .catch(function (e) {
               console.error(e);
